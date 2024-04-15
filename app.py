@@ -44,7 +44,7 @@ def create_room(sid):
     # send request to external service to create room
     url = f"{API_SERVER}/rooms"
     print(f"create_room: {url}")
-    response = requests.post(url)
+    response = requests.post(url, timeout=3)
     print(response.status_code)
     if response.status_code != 200:
         return f"{sid} created room failed"
