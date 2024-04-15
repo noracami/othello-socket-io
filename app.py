@@ -1,4 +1,5 @@
 import os
+from random import random
 import socketio
 from flask import Flask
 from gevent import monkey
@@ -31,6 +32,16 @@ def disconnect(sid):
 def chat_to_lobby(sid, data):
     print(f"message from {sid}: {data}")
     sio.emit("message", data, skip_sid=sid)
+
+
+@sio.on("room:create")
+def create_room(sid):
+    random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    random_room = [
+        random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)
+    ].join("")
+    sio.emit("message", f"{sid} created room {random_room}", skip_sid=sid)
+    return f"{sid} created room {random_room} success"
 
 
 @app.route("/health")
