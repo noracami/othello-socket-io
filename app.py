@@ -66,6 +66,18 @@ def create_room(sid):
     return f"{sid} created room {random_room} success"
 
 
+@sio.on("room:chat")
+def chat_to_room(sid, data):
+    print(f"chat_to_room: {data}")
+    room_id = data.get("room_id")
+    message = data.get("message")
+    if not room_id or not message:
+        return f"invalid data: {data}"
+
+    sio.emit("message", message, room=room_id, skip_sid=sid)
+    return f"send message to room {room_id} success"
+
+
 @app.route("/health")
 def health():
     return "OK"
