@@ -1,5 +1,5 @@
 import os
-from random import random
+import random
 import socketio
 from flask import Flask
 from gevent import monkey
@@ -37,9 +37,9 @@ def chat_to_lobby(sid, data):
 @sio.on("room:create")
 def create_room(sid):
     random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    random_room = [
-        random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)
-    ].join("")
+    random_room = "".join(
+        [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
+    )
     sio.emit("message", f"{sid} created room {random_room}", skip_sid=sid)
     return f"{sid} created room {random_room} success"
 
