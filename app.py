@@ -57,7 +57,7 @@ def create_room(sid):
     if response.status_code != 201:
         return f"{sid} created room failed"
 
-    sid.join(random_room)
+    sio.enter_room(sid, random_room)
 
     # broadcast json to all clients
     broadcast_message = response.json()
