@@ -11,12 +11,14 @@ monkey.patch_all()
 app = Flask(__name__)
 
 REDIS_URI = os.environ.get("REDIS_URI", "redis://localhost:6379/0")
+print(f"REDIS_URI: {REDIS_URI}")
 
 redis_manager = socketio.RedisManager(REDIS_URI)
 sio = socketio.Server(client_manager=redis_manager, cors_allowed_origins="*")
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
 API_SERVER = os.environ.get("API_SERVER", "http://localhost:5000")
+print(f"API_SERVER: {API_SERVER}")
 
 
 @sio.event
@@ -41,6 +43,9 @@ def chat_to_lobby(sid, data):
 def create_room(sid):
     # send request to external service to create room
     response = requests.post(f"{API_SERVER}/rooms")
+    if response.status_code != 200:
+        return f"{sid} created room failed"
+
     response_data = response.json()
     print(response_data)
     random_room = response_data.get("room")
