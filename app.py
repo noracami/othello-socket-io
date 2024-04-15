@@ -26,6 +26,13 @@ def disconnect(sid):
     print(f"disconnect {sid}")
 
 
+# handle if client send message, broadcast to all clients
+@sio.event
+def chat_to_lobby(sid, data):
+    print(f"message from {sid}: {data}")
+    sio.emit("message", data, skip_sid=sid)
+
+
 @app.route("/health")
 def health():
     return "OK"
