@@ -18,7 +18,7 @@ redis_manager = socketio.RedisManager(REDIS_URI)
 sio = socketio.Server(client_manager=redis_manager, cors_allowed_origins="*")
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
-API_SERVER = os.environ.get("API_SERVER", "http://localhost:5000")
+API_SERVER = os.environ.get("API_SERVER", "http://localhost:3000")
 print(f"API_SERVER: {API_SERVER}")
 
 
@@ -50,7 +50,7 @@ def create_room(sid):
     random_room = "".join(
         [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
     )
-    data = {"name": f"room_{DateTime.now()}", "channel_id": random_room}
+    data = {"name": f"room_{DateTime.now().isoformat()}", "channel_id": random_room}
     response = requests.post(url, timeout=3, data=data, headers=headers)
     print(response.status_code)
 
@@ -60,7 +60,7 @@ def create_room(sid):
     sid.join(random_room)
 
     # broadcast json to all clients
-    broadcast_message = {"message": f"{sid} created room {random_room}"}
+    broadcast_message = response.json()
 
     sio.emit("message", broadcast_message, skip_sid=sid)
     return f"{sid} created room {random_room} success"
@@ -69,6 +69,24 @@ def create_room(sid):
 @app.route("/health")
 def health():
     return "OK"
+
+
+# @app.route("/rooms")
+# def rooms():
+#     url = f"{API_SERVER}/rooms"
+#     headers = {"Content-Type": "application/json"}
+#     random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+#     random_room = "".join(
+#         [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
+#     )
+#     data = {"name": f"room_{DateTime.now().isoformat()}", "channel_id": random_room}
+#     response = requests.post(url, timeout=3, json=data, headers=headers)
+#     print(response.status_code)
+#     if response.status_code != 201:
+#         sid = "unknown"
+#         return f"{sid} created room failed"
+
+#     return response.json()
 
 
 if __name__ == "__main__":
