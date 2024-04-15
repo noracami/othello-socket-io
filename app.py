@@ -42,7 +42,10 @@ def chat_to_lobby(sid, data):
 @sio.on("room:create")
 def create_room(sid):
     # send request to external service to create room
-    response = requests.post(f"{API_SERVER}/rooms")
+    url = f"{API_SERVER}/rooms"
+    print(f"create_room: {url}")
+    response = requests.post(url)
+    print(response.status_code)
     if response.status_code != 200:
         return f"{sid} created room failed"
 
