@@ -51,7 +51,7 @@ def create_room(sid):
         [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
     )
     data = {"name": f"room_{DateTime.now().isoformat()}", "channel_id": random_room}
-    response = requests.post(url, timeout=3, data=data, headers=headers)
+    response = requests.post(url, timeout=3, json=data, headers=headers)
     print(response.status_code)
 
     if response.status_code != 201:
