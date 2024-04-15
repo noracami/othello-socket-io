@@ -1,5 +1,6 @@
 import os
 import random
+import requests
 import socketio
 from flask import Flask
 from gevent import monkey
@@ -14,6 +15,8 @@ REDIS_URI = os.environ.get("REDIS_URI", "redis://localhost:6379/0")
 redis_manager = socketio.RedisManager(REDIS_URI)
 sio = socketio.Server(client_manager=redis_manager, cors_allowed_origins="*")
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+
+API_SERVER = os.environ.get("API_SERVER", "http://localhost:5000")
 
 
 @sio.event
@@ -36,11 +39,17 @@ def chat_to_lobby(sid, data):
 
 @sio.on("room:create")
 def create_room(sid):
-    random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    random_room = "".join(
-        [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
-    )
-    sio.emit("message", f"{sid} created room {random_room}", skip_sid=sid)
+    # send request to external service to create room
+    response = requests.post(f"{API_SERVER}/rooms")
+    response_data = response.json()
+    print(response_data)
+    random_room = response_data.get("room")
+
+    # random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    # random_room = "".join(
+    #     [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
+    # )
+    # sio.emit("message", f"{sid} created room {random_room}", skip_sid=sid)
     return f"{sid} created room {random_room} success"
 
 
