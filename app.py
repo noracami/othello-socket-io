@@ -45,12 +45,13 @@ def create_room(sid):
     # send request to external service to create room
     url = f"{API_SERVER}/rooms"
     print(f"create_room: {url}")
+    headers = {"Content-Type": "application/json"}
     random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     random_room = "".join(
         [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
     )
     data = {"name": f"room_{DateTime.now()}", "channel_id": random_room}
-    response = requests.post(url, timeout=3, data=data)
+    response = requests.post(url, timeout=3, data=data, headers=headers)
     print(response.status_code)
 
     if response.status_code != 201:
