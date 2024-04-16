@@ -60,9 +60,12 @@ def create_room(sid):
     sio.enter_room(sid, random_room)
 
     # broadcast json to all clients
-    broadcast_message = response.json()
+    r = response.json()
 
-    sio.emit("message", broadcast_message, skip_sid=sid)
+    sio.emit("message", r, skip_sid=sid)
+    sio.emit(
+        "room:created", {"room_name": r.get("name"), "room_id": r.get("channel_id")}
+    )
     return f"{sid} created room {random_room} success"
 
 
