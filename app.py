@@ -1,10 +1,11 @@
+import json
 import os
-from datetime import datetime as DateTime
-import random
 import requests
 import socketio
+from datetime import datetime as DateTime
 from flask import Flask
 from gevent import monkey
+# import random
 
 monkey.patch_all()
 
@@ -44,29 +45,33 @@ def chat_to_lobby(sid, data):
 def create_room(sid):
     # send request to external service to create room
     url = f"{API_SERVER}/rooms"
-    print(f"create_room: {url}")
     headers = {"Content-Type": "application/json"}
-    random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    random_room = "".join(
-        [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
-    )
-    data = {"name": f"room_{DateTime.now().isoformat()}", "channel_id": random_room}
+    # random_char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    # random_room = "".join(
+    #     [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
+    # )
+    data = {"name": f"room_{DateTime.now().isoformat()}"}
     response = requests.post(url, timeout=3, json=data, headers=headers)
-    print(response.status_code)
 
     if response.status_code != 201:
         return f"{sid} created room failed"
 
-    sio.enter_room(sid, random_room)
+    r = response.json()
+    room_id = r.get("channel_id")
+
+    if room_id:
+        sio.enter_room(sid, room_id)
+    else:
+        return f"{sid} created room failed"
+
+    random_room = {"room_name": r.get("name"), "room_id": room_id}
 
     # broadcast json to all clients
-    r = response.json()
-
-    sio.emit("message", r, skip_sid=sid)
-    sio.emit(
-        "room:created", {"room_name": r.get("name"), "room_id": r.get("channel_id")}
+    sio.emit("room:created", random_room, skip_sid=sid)
+    # return f"{sid} created room {random_room} success"
+    return json.dumps(
+        {"status_code": 201, "message": "created room success", "data": random_room}
     )
-    return f"{sid} created room {random_room} success"
 
 
 @sio.on("room:chat")
