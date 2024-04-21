@@ -2,7 +2,6 @@ import json
 import os
 import requests
 import socketio
-from datetime import datetime as DateTime
 from flask import Flask
 from gevent import monkey
 # import random
@@ -42,7 +41,7 @@ def chat_to_lobby(sid, data):
 
 
 @sio.on("room:create")
-def create_room(sid):
+def create_room(sid, data):
     # send request to external service to create room
     url = f"{API_SERVER}/rooms"
     headers = {"Content-Type": "application/json"}
@@ -50,7 +49,7 @@ def create_room(sid):
     # random_room = "".join(
     #     [random_char[random.randint(0, len(random_char) - 1)] for _i in range(20)]
     # )
-    data = {"name": f"room_{DateTime.now().isoformat()}"}
+    # data = {"name": f"room_{DateTime.now().isoformat()}"}
     response = requests.post(url, timeout=3, json=data, headers=headers)
 
     if response.status_code != 201:
